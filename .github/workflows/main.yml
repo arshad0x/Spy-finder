@@ -25,6 +25,13 @@ jobs:
           fi
         fi
 
+    - name: Fix gradle properties for CI
+      run: |
+        if [ -f "gradle.properties" ]; then
+          sed -i 's/org.gradle.configuration-cache=true/org.gradle.configuration-cache=false/g' gradle.properties
+          sed -i 's/kotlin.compiler.execution.strategy=in-process/kotlin.compiler.execution.strategy=daemon/g' gradle.properties
+        fi
+
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -35,9 +42,10 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '9.3.1'
+        cache-disabled: true
 
     - name: Build Debug APK
-      run: gradle :app:assembleDebug --no-configuration-cache --stacktrace
+      run: gradle assembleDebug --no-configuration-cache --no-build-cache --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
